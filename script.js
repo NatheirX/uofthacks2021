@@ -6,16 +6,19 @@ let gasRoad, EVroad;
 let electricCar, gasCar;
 let gasTanks = [];
 let EVcharger = [];
+let road, electric, gas;
 function preload() {
   road = loadImage("./images/road.jpg");
+  electric = loadImage("./images/electric.png");
+  gas = loadImage("./images/gas.png");
 }
 
 function setup() {
   createCanvas(screen_width - 10, screen_height - 20);
   gasRoad = drawingRoad(screen_width / 6.5, 0);
   EVroad = drawingRoad((screen_width * 1.95) / 3, 0);
-  gasCar = new Car(width / 4, height / 1.5, "electric");
-  electricCar = new Car((3 * width) / 4, height / 1.5, "gas");
+  gasCar = new Car(width / 4, height / 1.5, "gas");
+  electricCar = new Car((3 * width) / 4, height / 1.5, "electric");
 }
 
 function draw() {
@@ -33,15 +36,16 @@ function draw() {
   for (let i = 0; i < EVcharger.length; i++) {
     EVcharger[i].move();
   }
-
-  if (keyIsDown(RIGHT_ARROW)) {
-    if (electricCar.x <= (3 * width) / 4 + 150) {
-      electricCar.x += 5;
+  if (electricCar.fuel > 0) {
+    if (keyIsDown(RIGHT_ARROW)) {
+      if (electricCar.x <= (3 * width) / 4 + 150) {
+        electricCar.x += 5;
+      }
     }
-  }
-  if (keyIsDown(LEFT_ARROW)) {
-    if (electricCar.x >= (3 * width) / 4 - 150) {
-      electricCar.x -= 5;
+    if (keyIsDown(LEFT_ARROW)) {
+      if (electricCar.x >= (3 * width) / 4 - 150) {
+        electricCar.x -= 5;
+      }
     }
   }
 
@@ -92,16 +96,24 @@ function Car(x, y, type) {
   this.speed = CONST_SPEED;
   this.money = STARTER_MONEY;
   this.type = type;
+  this.traveled = 0;
 
   this.show = function () {
-    rectMode(CENTER);
-    rect(this.x, this.y, 50, 75);
+    if (type == "electric") {
+      image(electric, this.x - 50, this.y - 50, 100, 100);
+    } else {
+      image(gas, this.x - 50, this.y - 50, 100, 100);
+    }
   };
   this.move = function (roads) {
-    for (let i = 0; i < roads.length; i++) {
-      roads[i].y += this.speed;
-      if (roads[i].y > screen_height) {
-        roads[i].y = -screen_height + 25;
+    if (this.fuel > 0) {
+      for (let i = 0; i < roads.length; i++) {
+        roads[i].y += this.speed;
+        if (roads[i].y > screen_height) {
+          roads[i].y = -screen_height + 25;
+          this.fuel -= 10;
+          this.traveled += CONST_SPEED;
+        }
       }
     }
   };
